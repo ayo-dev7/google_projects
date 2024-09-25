@@ -27,6 +27,10 @@ jobs:
           pip install -r api_services/requirements.txt
           pip install setuptools wheel twine
 
+      - name: List api_services directory
+        run: |
+          ls -la api_services
+
       - name: Run tests
         run: |
           PYTHONPATH=api_services pytest api_services/tests
@@ -38,7 +42,6 @@ jobs:
 
       - name: Publish to PyPI
         run: |
-          cd api_services
           twine upload dist/*
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
