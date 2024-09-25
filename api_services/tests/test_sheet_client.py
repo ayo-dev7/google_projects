@@ -1,85 +1,153 @@
 import unittest
-from unittest.mock import MagicMock, patch
-from api_services.api_calls.sheet_client import GoogleSheetsClient
+from unittest.mock import patch, MagicMock
+import pandas as pd
+from api_services.api_calls.sheet_client import GoogleSheetsClient  # Make sure to import your GoogleSheetsClient
+import json
 
 class TestGoogleSheetsClient(unittest.TestCase):
-
-    def setUp(self):
-        # Mock the Google Sheets API service
+    
+    @patch('sheet_client.create_service')
+    def setUp(self, mock_create_service):
         self.mock_service = MagicMock()
-        self.sheet_client = GoogleSheetsClient(client_secret_file="fake_secret.json")
-        self.sheet_client.service = self.mock_service
+        mock_create_service.return_value = self.mock_service
+        # Pass scopes as a list
+        self.client = GoogleSheetsClient(client_secret_file='client_secret.json',scopes=['https://www.googleapis.com/auth/spreadsheets'])
 
-    @patch("google_services.sheet_client.create_service")
-    def test_get_sheet_success(self, mock_create_service):
-        self.mock_service.spreadsheets().get.return_value.execute.return_value = {"spreadsheetId": "spreadsheet_id"}
-        result = self.sheet_client.get_sheet("spreadsheet_id")
-        self.mock_service.spreadsheets().get.assert_has_calls([
-            unittest.mock.call(spreadsheetId="spreadsheet_id"),
-            unittest.mock.call().execute()
-        ])
-        self.assertEqual(result["spreadsheetId"], "spreadsheet_id")
+    def test_initialization_with_invalid_scopes(self):
+        with self.assertRaises(ValueError):
+            GoogleSheetsClient('client_secret.json',scopes='invalid_scope')
+    
+    def test_get_sheet_with_missing_id(self):
+        with self.assertRaises(ValueError):
+            self.client.get_sheet('')
 
-    @patch("google_services.sheet_client.create_service")
-    def test_read_sheet_success(self, mock_create_service):
-        self.mock_service.spreadsheets().values().get.return_value.execute.return_value = {"values": [["A1", "B1"]]}
-        result = self.sheet_client.read_sheet("spreadsheet_id", "range_name")
-        self.mock_service.spreadsheets().values().get.assert_has_calls([
-            unittest.mock.call(spreadsheetId="spreadsheet_id", range="range_name"),
-            unittest.mock.call().execute()
-        ])
-        self.assertEqual(result["values"], [["A1", "B1"]])
+    def test_get_sheet_success(self):
+        spreadsheet_id = '1A2B3C4D5E6F7G8H9I0J'
+        mock_response = {
+            'spreadsheetId':spreadsheet_id,
+            'properties': {
+                'title':'Mock Spreadsheet Title',
+                'locale': 'en_US'
+            }
+        }
+        # Properly set up method chaining for the mock
+        self.mock_service.spreadsheets.return_value.get.return_value.execute.return_value = mock_response
 
-    @patch("google_services.sheet_client.create_service")
-    def test_append_sheet_success(self, mock_create_service):
-        self.mock_service.spreadsheets().values().append.return_value.execute.return_value = {"updates": "success"}
-        result = self.sheet_client.append_sheet("spreadsheet_id", "range_name", [["A1", "B1"]])
-        self.mock_service.spreadsheets().values().append.assert_has_calls([
-            unittest.mock.call(spreadsheetId="spreadsheet_id", range="range_name", valueInputOption="RAW", body={"values": [["A1", "B1"]]}),
-            unittest.mock.call().execute()
-        ])
-        self.assertEqual(result["updates"], "success")
+        result = self.client.get_sheet(spreadsheet_id)
 
-    @patch("google_services.sheet_client.create_service")
-    def test_update_sheet_success(self, mock_create_service):
-        self.mock_service.spreadsheets().values().update.return_value.execute.return_value = {"updatedRange": "Sheet1!A1:B1"}
-        result = self.sheet_client.update_sheet("spreadsheet_id", "range_name", [["A1", "B1"]])
-        self.mock_service.spreadsheets().values().update.assert_has_calls([
-            unittest.mock.call(spreadsheetId="spreadsheet_id", range="range_name", valueInputOption="RAW", body={"values": [["A1", "B1"]]}),
-            unittest.mock.call().execute()
-        ])
-        self.assertEqual(result["updatedRange"], "Sheet1!A1:B1")
+        # Validate the result
+        expected_result = json.dumps(mock_response, indent=4)
+        self.assertEqual(result, expected_result)
 
-    @patch("google_services.sheet_client.create_service")
-    def test_create_sheet_success(self, mock_create_service):
-        self.mock_service.spreadsheets().batchUpdate.return_value.execute.return_value = {"replies": [{"addSheet": {"properties": {"sheetId": "sheet_id"}}}]}
-        result = self.sheet_client.create_sheet("spreadsheet_id", "Sheet1")
-        self.mock_service.spreadsheets().batchUpdate.assert_has_calls([
-            unittest.mock.call(spreadsheetId="spreadsheet_id", body={"requests": [{"addSheet": {"properties": {"title": "Sheet1"}}}]}),
-            unittest.mock.call().execute()
-        ])
-        self.assertEqual(result["replies"][0]["addSheet"]["properties"]["sheetId"], "sheet_id")
+    def test_read_sheet_with_missing_id(self):
+        with self.assertRaises(ValueError):
+            self.client.read_sheet('','A1:B2')
 
-    @patch("google_services.sheet_client.create_service")
-    def test_delete_sheet_success(self, mock_create_service):
-        self.mock_service.spreadsheets().batchUpdate.return_value.execute.return_value = {"replies": [{"deleteSheet": {"sheetId": "sheet_id"}}]}
-        result = self.sheet_client.delete_sheet("spreadsheet_id", "sheet_id")
-        self.mock_service.spreadsheets().batchUpdate.assert_has_calls([
-            unittest.mock.call(spreadsheetId="spreadsheet_id", body={"requests": [{"deleteSheet": {"sheetId": "sheet_id"}}]}),
-            unittest.mock.call().execute()
-        ])
-        self.assertEqual(result["replies"][0]["deleteSheet"]["sheetId"], "sheet_id")
+    def test_read_sheet_with_missing_range(self):
+        with self.assertRaises(ValueError):
+            self.client.read_sheet('1A2B3C4D5E6F7G8H9I0J','')
 
-    @patch("google_services.sheet_client.create_service")
-    def test_batch_update_success(self, mock_create_service):
-        self.mock_service.spreadsheets().batchUpdate.return_value.execute.return_value = {"updated": "success"}
-        body = {"requests": [{"updateCells": {}}]}
-        result = self.sheet_client.batch_update("spreadsheet_id", body)
-        self.mock_service.spreadsheets().batchUpdate.assert_has_calls([
-            unittest.mock.call(spreadsheetId="spreadsheet_id", body=body),
-            unittest.mock.call().execute()
-        ])
-        self.assertEqual(result["updated"], "success")
+    def test_read_sheet_success(self):
+        spreadsheet_id = '1A2B3C4D5E6F7G8H9I0J'
+        range_name = 'Sheet1!A1:B2'
+        mock_values = [
+            ['Header1', 'Header2'],
+            ['Value1', 'Value2']
+        ]
+        mock_response = {'values': mock_values}
+        
+        self.mock_service.spreadsheets.return_value.values.return_value.get.return_value.execute.return_value = mock_response
+        
+        result = self.client.read_sheet(spreadsheet_id, range_name)
+        
+        # Validate the result
+        self.assertEqual(result, mock_values)
 
-if __name__ == "__main__":
+    def test_read_sheet_to_dataframe_success(self):
+        spreadsheet_id = '1A2B3C4D5E6F7G8H9I0J'
+        range_name = 'Sheet1!A1:B2'
+        mock_values = [
+            ['Header1', 'Header2'],
+            ['Value1', 'Value2']
+        ]
+        mock_response = {'values': mock_values}
+
+        self.mock_service.spreadsheets.return_value.values.return_value.get.return_value.execute.return_value = mock_response
+
+        result = self.client.read_sheet_to_dataframe(spreadsheet_id, range_name)
+
+        # Validate the result
+        expected_df = pd.DataFrame(mock_values[1:], columns=mock_values[0])
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_create_sheet_with_missing_id(self):
+        with self.assertRaises(ValueError):
+            self.client.create_sheet('', 'NewSheet')
+
+    def test_create_sheet_with_missing_name(self):
+        with self.assertRaises(ValueError):
+            self.client.create_sheet('1A2B3C4D5E6F7G8H9I0J', '')
+    def test_create_sheet_success(self):
+        spreadsheet_id = '1A2B3C4D5E6F7G8H9I0J'
+        sheet_name = 'NewSheet'
+        mock_response = {
+            'replies': [{'addSheet': {'properties': {'title': sheet_name}}}]
+        }
+
+        self.mock_service.spreadsheets.return_value.batchUpdate.return_value.execute.return_value = mock_response
+
+        result = self.client.create_sheet(spreadsheet_id, sheet_name)
+
+        expected_message = f"Sheet titled '{sheet_name}' created successfully. API Response: {json.dumps(mock_response, indent=4)}"
+        self.assertEqual(result, expected_message)
+    
+    def test_delete_sheet_with_missing_id(self):
+        with self.assertRaises(ValueError):
+            self.client.delete_sheet('', 123)
+
+    def test_delete_sheet_with_missing_sheet_id(self):
+        with self.assertRaises(ValueError):
+            self.client.delete_sheet('1A2B3C4D5E6F7G8H9I0J', '')
+    
+    def test_delete_sheet_success(self):
+        spreadsheet_id = '1A2B3C4D5E6F7G8H9I0J'
+        sheet_id = 123
+        mock_response = {}
+
+        self.mock_service.spreadsheets.return_value.batchUpdate.return_value.execute.return_value = mock_response
+
+        result = self.client.delete_sheet(spreadsheet_id, sheet_id)
+
+        expected_message = f"Sheet with ID '{sheet_id}' deleted successfully."
+        self.assertEqual(result, expected_message)
+
+    def test_update_sheet_success(self):
+        spreadsheet_id = '1A2B3C4D5E6F7G8H9I0J'
+        range_name = 'Sheet1!A1:B2'
+        valueInputOption = 'RAW'
+        values = [['Value1', 'Value2']]
+        mock_response = {'updatedCells': 2}
+
+        self.mock_service.spreadsheets.return_value.values.return_value.update.return_value.execute.return_value = mock_response
+
+        result = self.client.update_sheet(spreadsheet_id, range_name, valueInputOption, values)
+
+        expected_result = json.dumps(mock_response, indent=4)
+        self.assertEqual(result, expected_result)
+
+    def test_append_sheet_success(self):
+        spreadsheet_id = '1A2B3C4D5E6F7G8H9I0J'
+        range_name = 'Sheet1!A1:B2'
+        valueInputOption = 'RAW'
+        values = [['Value1', 'Value2']]
+        mock_response = {'updates': {'updatedCells': 2}}
+
+        self.mock_service.spreadsheets.return_value.values.return_value.append.return_value.execute.return_value = mock_response
+
+        result = self.client.append_sheet(spreadsheet_id, range_name, valueInputOption, values)
+
+        expected_result = json.dumps(mock_response, indent=4)
+        self.assertEqual(result, expected_result)
+
+if __name__ == '__main__':
     unittest.main()
