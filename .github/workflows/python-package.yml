@@ -38,6 +38,7 @@ jobs:
 
       - name: Publish to PyPI
         run: |
+          cd api_services
           twine upload dist/*
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
