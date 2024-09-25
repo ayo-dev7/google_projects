@@ -1,15 +1,12 @@
 from setuptools import setup, find_packages
 import os
 
-# Path to the root directory containing README.md
-root_dir = os.path.dirname(os.path.dirname(__file__))
+# Get the current directory of the setup.py file
+here = os.path.dirname(__file__)
 
-# Full path to README.md
-readme_path = os.path.join(root_dir, 'README.md')
-
-# Read the README.md file
-with open(readme_path, encoding='utf-8') as f:
-    long_description = f.read()
+# Construct the absolute path to README.md located in the parent directory
+with open(os.path.join(here, '..', 'README.md'), 'r', encoding='utf-8') as fh:
+    long_description = fh.read()
 
 setup(
     name='api-services',  
