@@ -3,7 +3,11 @@ import json
 import pandas as pd
 
 class GoogleSheetsClient:
-    def __init__(self, client_secret_file,api_version='v4', *scopes, prefix=''):
+    def __init__(self, client_secret_file,api_version='v4', scopes=None, prefix=''):
+        if scopes is None:
+            scopes=[]
+        elif not isinstance(scopes,list):
+            raise ValueError("Scopes must be a list.")
         self.service = create_service(client_secret_file, 'sheets', api_version, *scopes, prefix=prefix)
 
     def get_sheet(self, spreadsheet_id):

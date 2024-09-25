@@ -3,7 +3,11 @@ import json
 import pandas as pd
 
 class GoogleSheetsClient:
-    def __init__(self, client_secret_file,api_version='v1', *scopes, prefix=''):
+    def __init__(self, client_secret_file,api_version='v1', scopes=None, prefix=''):
+        if scopes is None:
+            scopes=[]
+        elif not isinstance(scopes,list):
+            raise ValueError("Scopes must be a list.")
         self.service = create_service(client_secret_file, 'gmail', api_version, *scopes, prefix=prefix)
     
     def send_email(self, sender, to, subject, message_text):

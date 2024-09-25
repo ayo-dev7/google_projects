@@ -23,6 +23,9 @@ def save_credentials(creds, token_path):
         token_file.write(creds.to_json())
 
 def create_service(client_secret_file, api_name, api_version, *scopes, prefix=''):
+    if not scopes:
+        raise ValueError("At least one scope must be provided.")
+    
     """Creates the Google API service, managing OAuth 2.0 authentication and token handling."""
     working_dir = os.getcwd() #Get the current working directory
     token_dir = os.path.join(working_dir,"token_files") # Create a directory to store the token files
