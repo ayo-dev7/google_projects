@@ -17,7 +17,6 @@ setup(
         'google-auth==2.35.0',
         'google-auth-oauthlib==1.2.1',
         'httplib2==0.22.0',
-        'numpy==2.1.1',
         'pandas==2.2.3',
         'requests==2.32.3',
         'requests-oauthlib==2.0.0',
