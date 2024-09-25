@@ -1,23 +1,16 @@
 from setuptools import setup, find_packages
 import os
 
-# Get the current directory of the setup.py file
-here = os.path.dirname(__file__)
-
-# Construct the absolute path to README.md located in the parent directory
-with open(os.path.join(here, '..', 'README.md'), 'r', encoding='utf-8') as fh:
-    long_description = fh.read()
-
 setup(
     name='api-services',  
     version='0.1.0',          
     author='Damilola Adebiyi',  
     author_email='ayoadebiyi95@gmail.com',  
     description='A package for Google API services', 
-    long_description=long_description,  
+    long_description=open('../README.md').read(),  
     long_description_content_type='text/markdown',  
     url='https://github.com/ayo-dev7/google_projects',  
-    packages=find_packages(where='api_services'),  # Automatically find and include packages
+    packages=find_packages(),  # Automatically find and include packages
     package_dir={'':'api_services'},
     install_requires=[
         'cachetools==5.5.0',
