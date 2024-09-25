@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock, patch
-from api_calls.gmail_client import GoogleSheetsClient
+from api_services.api_calls.gmail_client import GoogleSheetsClient
 
 class TestGoogleGmailClient(unittest.TestCase):
 
