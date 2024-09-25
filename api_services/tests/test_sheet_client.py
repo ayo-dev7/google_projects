@@ -1,12 +1,12 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import pandas as pd
-from api_services.api_calls.sheet_client import GoogleSheetsClient  # Make sure to import your GoogleSheetsClient
+from api_calls.sheet_client import GoogleSheetsClient  # Make sure to import your GoogleSheetsClient
 import json
 
 class TestGoogleSheetsClient(unittest.TestCase):
     
-    @patch('sheet_client.create_service')
+    @patch('api_calls.sheet_client.create_service')
     def setUp(self, mock_create_service):
         self.mock_service = MagicMock()
         mock_create_service.return_value = self.mock_service

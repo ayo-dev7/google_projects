@@ -1,12 +1,12 @@
 import unittest
 from unittest.mock import patch, MagicMock, mock_open
-from api_services.api_calls.gmail_client import GoogleSheetsClient  # Adjust the import based on your project structure
+from api_calls.gmail_client import GoogleSheetsClient  # Adjust the import based on your project structure
 import base64
 from email.mime.text import MIMEText
 
 class TestGoogleSheetsClient(unittest.TestCase):
     
-    @patch('gmail_client.create_service')  # Ensure this path matches your import structure
+    @patch('api_calls.gmail_client.create_service')  # Ensure this path matches your import structure
     def setUp(self, mock_create_service):
         self.mock_service = MagicMock()
         mock_create_service.return_value = self.mock_service
