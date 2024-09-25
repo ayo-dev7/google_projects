@@ -43,7 +43,7 @@ jobs:
 
       - name: Publish to PyPI
         run: |
-          ls -la api_services/dist  # List contents of the dist folder
+          ls -la api_services/dist  # List contents of the dist folders
           twine upload api_services/dist/*
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
