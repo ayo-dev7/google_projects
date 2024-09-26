@@ -10,7 +10,7 @@ except FileNotFoundError:
 
 setup(
     name='api-services',  
-    version='0.1.0',          
+    version='0.1.1',          
     author='Damilola Adebiyi',  
     author_email='ayoadebiyi95@gmail.com',  
     description='A package for Google API services', 
