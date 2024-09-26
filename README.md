@@ -83,12 +83,6 @@ Contributions are welcome! Please follow these steps to contribute:
 ## **License**
 This project is licensed under the MIT License. See the LICENSE file for details.
 
-### Instructions
-- Copy the entire block above and paste it into your `README.md` file.
-- Be sure to replace `<repository_url>` with your actual GitHub repository URL.
-
-This should now correctly include all sections. Let me know if you need anything else!
-
 
 
 

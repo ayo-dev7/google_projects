@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock, mock_open
-from api_calls.gmail_client import GoogleSheetsClient  # Adjust the import based on your project structure
+from api_calls.gmail_client import GoogleGmailClient  # Adjust the import based on your project structure
 import base64
 from email.mime.text import MIMEText
 
@@ -10,7 +10,7 @@ class TestGoogleSheetsClient(unittest.TestCase):
     def setUp(self, mock_create_service):
         self.mock_service = MagicMock()
         mock_create_service.return_value = self.mock_service
-        self.client = GoogleSheetsClient(client_secret_file='client_secret.json', scopes=['https://www.googleapis.com/auth/gmail.send'])
+        self.client = GoogleGmailClient(client_secret_file='client_secret.json', scopes=['https://www.googleapis.com/auth/gmail.send'])
 
     def test_send_email_success(self):
         sender = "test@example.com"

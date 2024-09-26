@@ -2,7 +2,7 @@ from api_services.utils import create_service
 import json
 import pandas as pd
 
-class GoogleSheetsClient:
+class GoogleGmailClient:
     def __init__(self, client_secret_file,api_version='v1', scopes=None, prefix=''):
         if scopes is None:
             scopes=[]
